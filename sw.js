@@ -1,4 +1,4 @@
-const CACHE_NAME = 'git-pocket-v2';
+const CACHE_NAME = 'git-pocket-v3';
 
 const ASSETS = [
   './',
@@ -41,6 +41,15 @@ self.addEventListener('message', event => {
 // Estratégia: Cache First → fallback para rede
 self.addEventListener('fetch', event => {
   if (event.request.method !== 'GET') return;
+
+  // Ignora esquemas não-cacheáveis (chrome-extension, data:, etc.)
+  let url;
+  try {
+    url = new URL(event.request.url);
+  } catch {
+    return;
+  }
+  if (!['http:', 'https:'].includes(url.protocol)) return;
 
   event.respondWith(
     caches.match(event.request).then(cached => {
