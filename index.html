@@ -1,0 +1,1548 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Git Pocket — Guia Rápido</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0f1117;
+      --bg-card: #161b22;
+      --bg-code: #0d1117;
+      --bg-hover: #1c2333;
+      --border: #21262d;
+      --border-subtle: #1a1f29;
+      --text: #e6edf3;
+      --text-muted: #8b949e;
+      --text-subtle: #484f58;
+      --accent: #58a6ff;
+      --accent-dim: #1f3a5f;
+      --green: #3fb950;
+      --green-dim: #122920;
+      --orange: #d29922;
+      --orange-dim: #2d2009;
+      --red: #f85149;
+      --red-dim: #3d1212;
+      --purple: #bc8cff;
+      --purple-dim: #2a1f4e;
+      --teal: #39d353;
+      --radius: 8px;
+      --radius-sm: 5px;
+      --shadow: 0 4px 24px rgba(0,0,0,.4);
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Inter', sans-serif;
+      font-size: 15px;
+      line-height: 1.7;
+      min-height: 100vh;
+    }
+
+    /* ── Header ─────────────────────────────────────── */
+    header {
+      border-bottom: 1px solid var(--border);
+      padding: 2.5rem 0 2rem;
+      text-align: center;
+      background: linear-gradient(180deg, #12161f 0%, var(--bg) 100%);
+    }
+    header .logo {
+      display: inline-flex;
+      align-items: center;
+      gap: .55rem;
+      font-size: .72rem;
+      font-weight: 600;
+      letter-spacing: .18em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-bottom: 1rem;
+    }
+    header .logo svg { opacity: .7; }
+    header h1 {
+      font-size: 2.2rem;
+      font-weight: 300;
+      letter-spacing: -.02em;
+      color: var(--text);
+    }
+    header h1 span { color: var(--accent); font-weight: 600; }
+    header p {
+      color: var(--text-muted);
+      margin-top: .5rem;
+      font-size: .95rem;
+      font-weight: 300;
+    }
+
+    /* ── Layout ─────────────────────────────────────── */
+    main {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 2.5rem 1.5rem 5rem;
+    }
+
+    /* ── Search ─────────────────────────────────────── */
+    .search-wrap {
+      position: relative;
+      margin-bottom: 2.5rem;
+    }
+    .search-wrap svg {
+      position: absolute;
+      left: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-subtle);
+      pointer-events: none;
+    }
+    #search {
+      width: 100%;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      color: var(--text);
+      font-family: 'Inter', sans-serif;
+      font-size: .9rem;
+      padding: .75rem 1rem .75rem 2.6rem;
+      outline: none;
+      transition: border-color .2s;
+    }
+    #search::placeholder { color: var(--text-subtle); }
+    #search:focus { border-color: var(--accent); }
+
+    /* ── Group ──────────────────────────────────────── */
+    .group {
+      margin-bottom: 1rem;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      transition: border-color .2s;
+    }
+    .group:hover { border-color: #30363d; }
+
+    .group-header {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 1.1rem 1.4rem;
+      cursor: pointer;
+      user-select: none;
+      background: var(--bg-card);
+      transition: background .15s;
+    }
+    .group-header:hover { background: var(--bg-hover); }
+
+    .group-icon {
+      width: 32px;
+      height: 32px;
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      font-size: 1rem;
+    }
+
+    .group-meta { flex: 1; min-width: 0; }
+    .group-title {
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--text);
+      letter-spacing: -.01em;
+    }
+    .group-desc {
+      font-size: .8rem;
+      color: var(--text-muted);
+      margin-top: .1rem;
+    }
+
+    .group-count {
+      font-size: .72rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      background: var(--border);
+      border-radius: 20px;
+      padding: .15rem .55rem;
+      letter-spacing: .02em;
+    }
+
+    .chevron {
+      color: var(--text-subtle);
+      transition: transform .25s ease;
+      flex-shrink: 0;
+    }
+    .group.open .chevron { transform: rotate(180deg); }
+
+    .group-body {
+      display: none;
+      border-top: 1px solid var(--border-subtle);
+    }
+    .group.open .group-body { display: block; }
+
+    /* ── Command Card ────────────────────────────────── */
+    .cmd {
+      padding: 1.4rem 1.4rem 1.4rem 1.6rem;
+      border-bottom: 1px solid var(--border-subtle);
+      transition: background .12s;
+    }
+    .cmd:last-child { border-bottom: none; }
+    .cmd:hover { background: rgba(255,255,255,.02); }
+
+    .cmd-name {
+      display: inline-block;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: .85rem;
+      font-weight: 500;
+      color: var(--accent);
+      background: var(--accent-dim);
+      border-radius: var(--radius-sm);
+      padding: .2rem .65rem;
+      margin-bottom: .65rem;
+      letter-spacing: .01em;
+    }
+
+    .cmd-what {
+      font-size: .92rem;
+      color: var(--text);
+      margin-bottom: .4rem;
+      font-weight: 500;
+    }
+    .cmd-when {
+      font-size: .85rem;
+      color: var(--text-muted);
+      margin-bottom: .85rem;
+      line-height: 1.6;
+    }
+
+    .cmd-example {
+      background: var(--bg-code);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: .75rem 1rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: .8rem;
+      color: var(--green);
+      white-space: pre-wrap;
+      overflow-x: auto;
+      line-height: 1.7;
+    }
+    .cmd-example .comment { color: var(--text-subtle); }
+    .cmd-example .flag    { color: var(--purple); }
+    .cmd-example .str     { color: var(--orange); }
+
+    /* ── Danger Alert ────────────────────────────────── */
+    .danger {
+      margin-top: .9rem;
+      background: rgba(248, 81, 73, .07);
+      border: 1px solid rgba(248, 81, 73, .25);
+      border-radius: var(--radius-sm);
+      padding: .75rem 1rem;
+      display: flex;
+      gap: .65rem;
+    }
+    .danger-icon { font-size: 1rem; flex-shrink: 0; line-height: 1.5; }
+    .danger-content {}
+    .danger-title {
+      font-size: .78rem;
+      font-weight: 700;
+      color: var(--red);
+      text-transform: uppercase;
+      letter-spacing: .06em;
+      margin-bottom: .2rem;
+    }
+    .danger-text {
+      font-size: .82rem;
+      color: #e0a0a0;
+      line-height: 1.6;
+    }
+    .danger-text code {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: .78rem;
+      background: rgba(248,81,73,.12);
+      padding: .05rem .3rem;
+      border-radius: 3px;
+      color: var(--red);
+    }
+
+    /* ── Warning Alert (cautious) ────────────────────── */
+    .warning {
+      margin-top: .9rem;
+      background: rgba(210, 153, 34, .07);
+      border: 1px solid rgba(210, 153, 34, .25);
+      border-radius: var(--radius-sm);
+      padding: .75rem 1rem;
+      display: flex;
+      gap: .65rem;
+    }
+    .warning-icon { font-size: 1rem; flex-shrink: 0; line-height: 1.5; }
+    .warning-title {
+      font-size: .78rem;
+      font-weight: 700;
+      color: var(--orange);
+      text-transform: uppercase;
+      letter-spacing: .06em;
+      margin-bottom: .2rem;
+    }
+    .warning-text {
+      font-size: .82rem;
+      color: #d9c07a;
+      line-height: 1.6;
+    }
+    .warning-text code {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: .78rem;
+      background: rgba(210,153,34,.12);
+      padding: .05rem .3rem;
+      border-radius: 3px;
+      color: var(--orange);
+    }
+
+    /* ── Tip ─────────────────────────────────────────── */
+    .tip {
+      margin-top: .9rem;
+      background: rgba(57,211,83,.06);
+      border: 1px solid rgba(57,211,83,.2);
+      border-radius: var(--radius-sm);
+      padding: .6rem 1rem;
+      font-size: .82rem;
+      color: #8fe0a0;
+      line-height: 1.6;
+    }
+    .tip::before { content: "💡 "; }
+    .tip code {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: .78rem;
+      background: rgba(57,211,83,.1);
+      padding: .05rem .3rem;
+      border-radius: 3px;
+      color: var(--green);
+    }
+
+    /* ── Subgroup ────────────────────────────────────── */
+    .subgroup-label {
+      padding: .55rem 1.4rem;
+      font-size: .7rem;
+      font-weight: 700;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: var(--text-subtle);
+      background: var(--bg);
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    /* ── No results ──────────────────────────────────── */
+    #no-results {
+      display: none;
+      text-align: center;
+      padding: 4rem 0;
+      color: var(--text-muted);
+      font-size: .9rem;
+    }
+
+    /* ── Footer ─────────────────────────────────────── */
+    footer {
+      border-top: 1px solid var(--border);
+      text-align: center;
+      padding: 2rem;
+      font-size: .78rem;
+      color: var(--text-subtle);
+    }
+
+    /* ── Color variants for group icons ─────────────── */
+    .ic-blue   { background: var(--accent-dim);  color: var(--accent); }
+    .ic-green  { background: var(--green-dim);   color: var(--green); }
+    .ic-orange { background: var(--orange-dim);  color: var(--orange); }
+    .ic-red    { background: var(--red-dim);     color: var(--red); }
+    .ic-purple { background: var(--purple-dim);  color: var(--purple); }
+    .ic-teal   { background: #0d2a1f;            color: #3ddba0; }
+    .ic-pink   { background: #2a1020;            color: #f778ba; }
+    .ic-sky    { background: #0d1f2d;            color: #79c0ff; }
+
+    /* ── Scrollbar ───────────────────────────────────── */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+    @media (max-width: 600px) {
+      header h1 { font-size: 1.6rem; }
+      .cmd { padding: 1.1rem 1rem; }
+      .group-header { padding: .9rem 1rem; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="logo">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <circle cx="12" cy="18" r="3"/><circle cx="6" cy="6" r="3"/><circle cx="18" cy="6" r="3"/>
+      <path d="M18 9v1a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V9"/><line x1="12" y1="12" x2="12" y2="15"/>
+    </svg>
+    Git Pocket
+  </div>
+  <h1>Guia Rápido de <span>Git</span></h1>
+  <p>Comandos essenciais para o dia a dia do desenvolvedor</p>
+</header>
+
+<main>
+  <div class="search-wrap">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+    </svg>
+    <input type="text" id="search" placeholder="Buscar comando, ex: reset, merge, stash…" />
+  </div>
+
+  <div id="no-results">Nenhum comando encontrado para "<span id="search-term"></span>".</div>
+
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <!-- 1. CONFIGURAÇÃO                                        -->
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <div class="group open" data-group="configuracao">
+    <div class="group-header" onclick="toggleGroup(this)">
+      <div class="group-icon ic-blue">⚙️</div>
+      <div class="group-meta">
+        <div class="group-title">Configuração</div>
+        <div class="group-desc">Configure identidade, editor, aliases e preferências globais do Git</div>
+      </div>
+      <span class="group-count">5</span>
+      <svg class="chevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+    </div>
+    <div class="group-body">
+
+      <div class="cmd" data-keywords="config name email user configurar identidade">
+        <div class="cmd-name">git config</div>
+        <div class="cmd-what">Define configurações do Git (nome, e-mail, editor, etc.)</div>
+        <div class="cmd-when">Use ao configurar um ambiente pela primeira vez ou ao ajustar preferências. O flag <code>--global</code> aplica para todos os repositórios do usuário; sem ele, aplica apenas ao repositório atual.</div>
+        <pre class="cmd-example"><span class="comment"># Definir nome e e-mail globalmente</span>
+git config <span class="flag">--global</span> user.name <span class="str">"Seu Nome"</span>
+git config <span class="flag">--global</span> user.email <span class="str">"seu@email.com"</span>
+
+<span class="comment"># Definir editor padrão</span>
+git config <span class="flag">--global</span> core.editor <span class="str">"code --wait"</span>
+
+<span class="comment"># Listar todas as configurações</span>
+git config <span class="flag">--list</span></pre>
+      </div>
+
+      <div class="cmd" data-keywords="config alias atalho shortcut">
+        <div class="cmd-name">git config alias</div>
+        <div class="cmd-what">Cria atalhos (aliases) para comandos longos</div>
+        <div class="cmd-when">Ideal para economizar tempo com comandos frequentes. Chame o alias com <code>git &lt;alias&gt;</code>.</div>
+        <pre class="cmd-example"><span class="comment"># Criar alias "st" para "status"</span>
+git config <span class="flag">--global</span> alias.st status
+
+<span class="comment"># Alias para log formatado</span>
+git config <span class="flag">--global</span> alias.lg <span class="str">"log --oneline --graph --decorate --all"</span>
+
+<span class="comment"># Usar o alias</span>
+git lg</pre>
+      </div>
+
+      <div class="cmd" data-keywords="config credential helper senha token armazenar">
+        <div class="cmd-name">git config credential.helper</div>
+        <div class="cmd-what">Configura o armazenamento de credenciais</div>
+        <div class="cmd-when">Use para não precisar digitar usuário/senha (ou token) a cada push/pull em repositórios HTTPS.</div>
+        <pre class="cmd-example"><span class="comment"># Armazenar em memória por 1 hora</span>
+git config <span class="flag">--global</span> credential.helper <span class="str">"cache --timeout=3600"</span>
+
+<span class="comment"># Armazenar permanentemente no disco</span>
+git config <span class="flag">--global</span> credential.helper store</pre>
+        <div class="warning">
+          <div class="warning-icon">⚠️</div>
+          <div>
+            <div class="warning-title">Atenção</div>
+            <div class="warning-text">O modo <code>store</code> salva as credenciais em texto puro no disco (<code>~/.git-credentials</code>). Prefira usar SSH ou um gerenciador de credenciais do sistema operacional.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="cmd" data-keywords="config pull rebase merge estrategia">
+        <div class="cmd-name">git config pull.rebase</div>
+        <div class="cmd-what">Define a estratégia padrão do <code>git pull</code> (merge ou rebase)</div>
+        <div class="cmd-when">Configure uma vez para evitar o aviso que o Git exibe ao rodar <code>git pull</code> sem definição explícita.</div>
+        <pre class="cmd-example"><span class="comment"># Usar rebase ao invés de merge no pull</span>
+git config <span class="flag">--global</span> pull.rebase true
+
+<span class="comment"># Usar merge (padrão tradicional)</span>
+git config <span class="flag">--global</span> pull.rebase false</pre>
+      </div>
+
+      <div class="cmd" data-keywords="gitignore ignore arquivos ignorar">
+        <div class="cmd-name">.gitignore</div>
+        <div class="cmd-what">Lista de padrões de arquivos/pastas que o Git deve ignorar</div>
+        <div class="cmd-when">Crie na raiz do projeto para excluir artefatos de build, variáveis de ambiente, dependências e arquivos pessoais do versionamento.</div>
+        <pre class="cmd-example"><span class="comment"># Criar ou editar .gitignore</span>
+echo <span class="str">"node_modules/"</span> >> .gitignore
+echo <span class="str">".env"</span> >> .gitignore
+echo <span class="str">"dist/"</span> >> .gitignore
+
+<span class="comment"># Verificar quais arquivos o Git está rastreando</span>
+git ls-files</pre>
+        <div class="tip">Use gitignore.io para gerar templates prontos para sua stack.</div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <!-- 2. INICIALIZAÇÃO E CLONAGEM                            -->
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <div class="group" data-group="init">
+    <div class="group-header" onclick="toggleGroup(this)">
+      <div class="group-icon ic-green">🌱</div>
+      <div class="group-meta">
+        <div class="group-title">Inicialização e Clonagem</div>
+        <div class="group-desc">Crie um novo repositório do zero ou obtenha uma cópia de um existente</div>
+      </div>
+      <span class="group-count">3</span>
+      <svg class="chevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+    </div>
+    <div class="group-body">
+
+      <div class="cmd" data-keywords="init inicializar criar repositório novo">
+        <div class="cmd-name">git init</div>
+        <div class="cmd-what">Inicializa um repositório Git em um diretório</div>
+        <div class="cmd-when">Use ao começar um projeto do zero, antes de fazer o primeiro commit. Cria a pasta oculta <code>.git/</code> com toda a estrutura interna.</div>
+        <pre class="cmd-example"><span class="comment"># Inicializar no diretório atual</span>
+git init
+
+<span class="comment"># Inicializar em uma nova pasta</span>
+git init meu-projeto</pre>
+      </div>
+
+      <div class="cmd" data-keywords="clone clonar baixar copiar repositório remoto">
+        <div class="cmd-name">git clone</div>
+        <div class="cmd-what">Clona um repositório remoto para a máquina local</div>
+        <div class="cmd-when">Use para obter uma cópia completa (histórico incluso) de um repositório existente. Aceita URLs HTTPS ou SSH.</div>
+        <pre class="cmd-example"><span class="comment"># Clonar via HTTPS</span>
+git clone https://github.com/usuario/repo.git
+
+<span class="comment"># Clonar via SSH (recomendado)</span>
+git clone git@github.com:usuario/repo.git
+
+<span class="comment"># Clonar em uma pasta com nome diferente</span>
+git clone git@github.com:usuario/repo.git minha-pasta
+
+<span class="comment"># Clonar apenas a branch principal (mais rápido)</span>
+git clone <span class="flag">--depth=1</span> git@github.com:usuario/repo.git</pre>
+      </div>
+
+      <div class="cmd" data-keywords="remote add origin remoto adicionar url">
+        <div class="cmd-name">git remote</div>
+        <div class="cmd-what">Gerencia conexões com repositórios remotos</div>
+        <div class="cmd-when">Use após <code>git init</code> para vincular o repositório local a um remoto, ou para gerenciar múltiplos remotos (ex: origin e upstream).</div>
+        <pre class="cmd-example"><span class="comment"># Adicionar um remoto</span>
+git remote add origin git@github.com:usuario/repo.git
+
+<span class="comment"># Listar remotos e suas URLs</span>
+git remote <span class="flag">-v</span>
+
+<span class="comment"># Alterar a URL de um remoto</span>
+git remote set-url origin git@github.com:usuario/novo-repo.git
+
+<span class="comment"># Remover um remoto</span>
+git remote remove origin</pre>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <!-- 3. INSPEÇÃO E STATUS                                   -->
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <div class="group" data-group="inspecao">
+    <div class="group-header" onclick="toggleGroup(this)">
+      <div class="group-icon ic-sky">🔍</div>
+      <div class="group-meta">
+        <div class="group-title">Inspeção e Status</div>
+        <div class="group-desc">Visualize o estado atual, diferenças e o histórico do repositório</div>
+      </div>
+      <span class="group-count">6</span>
+      <svg class="chevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+    </div>
+    <div class="group-body">
+
+      <div class="cmd" data-keywords="status estado arquivos modificados staged unstaged">
+        <div class="cmd-name">git status</div>
+        <div class="cmd-what">Exibe o estado atual da árvore de trabalho</div>
+        <div class="cmd-when">Use com frequência para saber quais arquivos foram modificados, quais estão na área de staging e quais são novos (untracked). É o comando mais consultado do dia a dia.</div>
+        <pre class="cmd-example"><span class="comment"># Status detalhado</span>
+git status
+
+<span class="comment"># Formato curto/resumido</span>
+git status <span class="flag">-s</span></pre>
+      </div>
+
+      <div class="cmd" data-keywords="diff diferença mudanças comparar arquivos">
+        <div class="cmd-name">git diff</div>
+        <div class="cmd-what">Mostra as diferenças entre versões de arquivos</div>
+        <div class="cmd-when">Use para revisar exatamente o que mudou antes de fazer um commit, ou para comparar branches.</div>
+        <pre class="cmd-example"><span class="comment"># Diff de arquivos não staged</span>
+git diff
+
+<span class="comment"># Diff de arquivos já adicionados ao staging</span>
+git diff <span class="flag">--staged</span>
+
+<span class="comment"># Comparar duas branches</span>
+git diff main..feature/minha-feature
+
+<span class="comment"># Diff de um arquivo específico</span>
+git diff src/arquivo.ts</pre>
+      </div>
+
+      <div class="cmd" data-keywords="log histórico commits visualizar">
+        <div class="cmd-name">git log</div>
+        <div class="cmd-what">Exibe o histórico de commits</div>
+        <div class="cmd-when">Use para navegar no histórico, entender o que foi alterado e por quem. Altamente configurável com flags de formatação.</div>
+        <pre class="cmd-example"><span class="comment"># Log padrão</span>
+git log
+
+<span class="comment"># Log resumido (uma linha por commit)</span>
+git log <span class="flag">--oneline</span>
+
+<span class="comment"># Log com grafo de branches</span>
+git log <span class="flag">--oneline --graph --decorate --all</span>
+
+<span class="comment"># Log dos últimos 5 commits</span>
+git log <span class="flag">-5</span>
+
+<span class="comment"># Log de um arquivo específico</span>
+git log <span class="flag">--follow</span> src/arquivo.ts
+
+<span class="comment"># Buscar por mensagem de commit</span>
+git log <span class="flag">--grep=</span><span class="str">"fix:"</span></pre>
+      </div>
+
+      <div class="cmd" data-keywords="show commit detalhes visualizar conteúdo">
+        <div class="cmd-name">git show</div>
+        <div class="cmd-what">Exibe detalhes de um commit específico</div>
+        <div class="cmd-when">Use para inspecionar exatamente o que um commit alterou, incluindo o diff completo das mudanças.</div>
+        <pre class="cmd-example"><span class="comment"># Detalhes do último commit</span>
+git show
+
+<span class="comment"># Detalhes de um commit pelo hash</span>
+git show a1b2c3d
+
+<span class="comment"># Mostrar apenas os arquivos alterados</span>
+git show <span class="flag">--stat</span> a1b2c3d
+
+<span class="comment"># Exibir conteúdo de um arquivo em um commit</span>
+git show a1b2c3d:src/arquivo.ts</pre>
+      </div>
+
+      <div class="cmd" data-keywords="blame autoria linha quem alterou responsável">
+        <div class="cmd-name">git blame</div>
+        <div class="cmd-what">Mostra quem alterou cada linha de um arquivo e em qual commit</div>
+        <div class="cmd-when">Use para investigar a origem de um trecho de código, entender o contexto de uma mudança ou rastrear um bug.</div>
+        <pre class="cmd-example"><span class="comment"># Blame de um arquivo</span>
+git blame src/arquivo.ts
+
+<span class="comment"># Blame com hash curto</span>
+git blame <span class="flag">-s</span> src/arquivo.ts
+
+<span class="comment"># Blame de linhas específicas (10 a 25)</span>
+git blame <span class="flag">-L 10,25</span> src/arquivo.ts</pre>
+      </div>
+
+      <div class="cmd" data-keywords="ls-files listar arquivos rastreados tracked">
+        <div class="cmd-name">git ls-files</div>
+        <div class="cmd-what">Lista todos os arquivos que o Git está rastreando</div>
+        <div class="cmd-when">Útil para verificar se um arquivo está sendo ignorado, se foi adicionado corretamente ao repositório ou para auditar o conteúdo.</div>
+        <pre class="cmd-example"><span class="comment"># Listar arquivos rastreados</span>
+git ls-files
+
+<span class="comment"># Listar arquivos ignorados</span>
+git ls-files <span class="flag">--others --ignored --exclude-standard</span></pre>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <!-- 4. STAGING E COMMITS                                   -->
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <div class="group" data-group="staging">
+    <div class="group-header" onclick="toggleGroup(this)">
+      <div class="group-icon ic-green">📦</div>
+      <div class="group-meta">
+        <div class="group-title">Staging e Commits</div>
+        <div class="group-desc">Prepare alterações e registre snapshots do projeto no histórico</div>
+      </div>
+      <span class="group-count">5</span>
+      <svg class="chevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+    </div>
+    <div class="group-body">
+
+      <div class="cmd" data-keywords="add adicionar staging área preparar">
+        <div class="cmd-name">git add</div>
+        <div class="cmd-what">Adiciona arquivos à área de staging (index)</div>
+        <div class="cmd-when">Use para selecionar quais mudanças farão parte do próximo commit. Prefira adicionar arquivos específicos a usar <code>git add .</code> indiscriminadamente.</div>
+        <pre class="cmd-example"><span class="comment"># Adicionar um arquivo específico</span>
+git add src/arquivo.ts
+
+<span class="comment"># Adicionar todos os arquivos alterados</span>
+git add .
+
+<span class="comment"># Adicionar interativamente (escolhe hunks)</span>
+git add <span class="flag">-p</span>
+
+<span class="comment"># Adicionar todos os .ts do diretório</span>
+git add src/*.ts</pre>
+        <div class="tip">Use <code>git add -p</code> para revisar cada bloco de mudança antes de adicionar — excelente para criar commits atômicos e bem focados.</div>
+      </div>
+
+      <div class="cmd" data-keywords="commit registrar salvar snapshot mensagem">
+        <div class="cmd-name">git commit</div>
+        <div class="cmd-what">Registra as mudanças do staging no histórico do repositório</div>
+        <div class="cmd-when">Use após preparar o staging com <code>git add</code>. Escreva mensagens claras e objetivas — prefira o padrão Conventional Commits.</div>
+        <pre class="cmd-example"><span class="comment"># Commit com mensagem inline</span>
+git commit <span class="flag">-m</span> <span class="str">"feat: adiciona tela de login"</span>
+
+<span class="comment"># Adicionar e commitar arquivos já rastreados</span>
+git commit <span class="flag">-am</span> <span class="str">"fix: corrige validação do formulário"</span>
+
+<span class="comment"># Abrir editor para mensagem detalhada</span>
+git commit
+
+<span class="comment"># Commit vazio (útil para disparar CI)</span>
+git commit <span class="flag">--allow-empty -m</span> <span class="str">"ci: trigger pipeline"</span></pre>
+      </div>
+
+      <div class="cmd" data-keywords="commit amend corrigir alterar último mensagem">
+        <div class="cmd-name">git commit --amend</div>
+        <div class="cmd-what">Modifica o último commit (mensagem e/ou conteúdo)</div>
+        <div class="cmd-when">Use logo após um commit para corrigir a mensagem ou incluir um arquivo esquecido, <strong>antes</strong> de fazer push.</div>
+        <pre class="cmd-example"><span class="comment"># Corrigir apenas a mensagem do último commit</span>
+git commit <span class="flag">--amend -m</span> <span class="str">"feat: mensagem corrigida"</span>
+
+<span class="comment"># Incluir arquivo esquecido sem mudar a mensagem</span>
+git add arquivo-esquecido.ts
+git commit <span class="flag">--amend --no-edit</span></pre>
+        <div class="danger">
+          <div class="danger-icon">🚨</div>
+          <div>
+            <div class="danger-title">Perigo — Reescreve histórico</div>
+            <div class="danger-text"><code>--amend</code> substitui o commit por um novo (hash diferente). Nunca use em commits que já foram enviados para um branch compartilhado — isso causará conflito de histórico para toda a equipe que fez pull.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="cmd" data-keywords="restore unstage descartar desfazer arquivo working tree">
+        <div class="cmd-name">git restore</div>
+        <div class="cmd-what">Descarta mudanças em arquivos ou remove do staging</div>
+        <div class="cmd-when">Use para reverter um arquivo ao seu estado no último commit (working tree) ou para removê-lo do staging sem perder as alterações locais.</div>
+        <pre class="cmd-example"><span class="comment"># Descartar mudanças no working tree</span>
+git restore src/arquivo.ts
+
+<span class="comment"># Remover arquivo do staging (mantém as mudanças)</span>
+git restore <span class="flag">--staged</span> src/arquivo.ts
+
+<span class="comment"># Restaurar como estava em um commit específico</span>
+git restore <span class="flag">--source=</span>a1b2c3d src/arquivo.ts</pre>
+        <div class="danger">
+          <div class="danger-icon">🚨</div>
+          <div>
+            <div class="danger-title">Perigo — Perda de dados</div>
+            <div class="danger-text"><code>git restore</code> sem <code>--staged</code> descarta as mudanças do working tree permanentemente. Não há como desfazer com <code>git reflog</code> se as mudanças ainda não foram commitadas.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="cmd" data-keywords="rm remover deletar arquivo rastreado untrack">
+        <div class="cmd-name">git rm</div>
+        <div class="cmd-what">Remove arquivos do rastreamento do Git (e opcionalmente do disco)</div>
+        <div class="cmd-when">Use quando quiser parar de versionar um arquivo. Com <code>--cached</code>, remove apenas do Git mas mantém o arquivo no disco.</div>
+        <pre class="cmd-example"><span class="comment"># Remover do Git e do disco</span>
+git rm arquivo.txt
+
+<span class="comment"># Parar de rastrear sem deletar (comum para .env)</span>
+git rm <span class="flag">--cached</span> .env
+
+<span class="comment"># Remover pasta inteira do rastreamento</span>
+git rm <span class="flag">-r --cached</span> dist/</pre>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <!-- 5. BRANCHES                                            -->
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <div class="group" data-group="branches">
+    <div class="group-header" onclick="toggleGroup(this)">
+      <div class="group-icon ic-purple">🌿</div>
+      <div class="group-meta">
+        <div class="group-title">Branches</div>
+        <div class="group-desc">Crie, navegue, renomeie e exclua branches de trabalho</div>
+      </div>
+      <span class="group-count">5</span>
+      <svg class="chevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+    </div>
+    <div class="group-body">
+
+      <div class="cmd" data-keywords="branch listar criar deletar renomear">
+        <div class="cmd-name">git branch</div>
+        <div class="cmd-what">Lista, cria, renomeia e deleta branches</div>
+        <div class="cmd-when">Use para gerenciar o ciclo de vida das branches. Para criar <em>e</em> já mudar para ela, prefira <code>git switch -c</code>.</div>
+        <pre class="cmd-example"><span class="comment"># Listar branches locais</span>
+git branch
+
+<span class="comment"># Listar branches remotas e locais</span>
+git branch <span class="flag">-a</span>
+
+<span class="comment"># Criar nova branch</span>
+git branch feature/login
+
+<span class="comment"># Renomear a branch atual</span>
+git branch <span class="flag">-m</span> novo-nome
+
+<span class="comment"># Deletar branch local (apenas se merged)</span>
+git branch <span class="flag">-d</span> feature/login
+
+<span class="comment"># Forçar exclusão da branch local</span>
+git branch <span class="flag">-D</span> feature/login</pre>
+        <div class="warning">
+          <div class="warning-icon">⚠️</div>
+          <div>
+            <div class="warning-title">Atenção</div>
+            <div class="warning-text">A flag <code>-D</code> deleta a branch mesmo que ela não tenha sido integrada (merged). Use com cautela para não perder commits.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="cmd" data-keywords="switch checkout mudar trocar branch navegar">
+        <div class="cmd-name">git switch</div>
+        <div class="cmd-what">Muda para outra branch (substituto moderno do <code>git checkout</code> para branches)</div>
+        <div class="cmd-when">Prefira <code>git switch</code> ao <code>git checkout</code> quando o objetivo for apenas trocar de branch — a semântica é mais clara.</div>
+        <pre class="cmd-example"><span class="comment"># Mudar para branch existente</span>
+git switch main
+
+<span class="comment"># Criar e mudar para nova branch</span>
+git switch <span class="flag">-c</span> feature/minha-feature
+
+<span class="comment"># Voltar para a branch anterior</span>
+git switch <span class="flag">-</span>
+
+<span class="comment"># Criar branch a partir de um commit</span>
+git switch <span class="flag">-c</span> hotfix/bug a1b2c3d</pre>
+      </div>
+
+      <div class="cmd" data-keywords="checkout mudar trocar branch arquivo navegar">
+        <div class="cmd-name">git checkout</div>
+        <div class="cmd-what">Muda de branch ou restaura arquivos (comando clássico, mais abrangente)</div>
+        <div class="cmd-when">Ainda amplamente usado. Para trocar de branch prefira <code>git switch</code>; para restaurar arquivos, prefira <code>git restore</code>. Mas é importante conhecer pois aparece muito em docs e tutoriais.</div>
+        <pre class="cmd-example"><span class="comment"># Mudar de branch</span>
+git checkout main
+
+<span class="comment"># Criar e mudar para nova branch</span>
+git checkout <span class="flag">-b</span> feature/nova
+
+<span class="comment"># Restaurar arquivo de um commit anterior</span>
+git checkout a1b2c3d <span class="flag">--</span> src/arquivo.ts
+
+<span class="comment"># "Detached HEAD": ir para um commit específico</span>
+git checkout a1b2c3d</pre>
+        <div class="warning">
+          <div class="warning-icon">⚠️</div>
+          <div>
+            <div class="warning-title">Detached HEAD</div>
+            <div class="warning-text">Ao fazer checkout de um hash diretamente, você entra no modo <em>detached HEAD</em>. Qualquer commit feito aqui ficará sem referência. Crie uma branch com <code>git switch -c nome-branch</code> antes de commitar.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="cmd" data-keywords="merge integrar unir juntar branch mesclar">
+        <div class="cmd-name">git merge</div>
+        <div class="cmd-what">Integra o histórico de uma branch na branch atual</div>
+        <div class="cmd-when">Use para incorporar mudanças de uma feature branch na branch principal. Gera um merge commit (preserva o histórico de ambas as branches).</div>
+        <pre class="cmd-example"><span class="comment"># Merge de feature na branch atual</span>
+git merge feature/login
+
+<span class="comment"># Fast-forward apenas (sem merge commit)</span>
+git merge <span class="flag">--ff-only</span> feature/login
+
+<span class="comment"># Sempre criar merge commit (sem fast-forward)</span>
+git merge <span class="flag">--no-ff</span> feature/login
+
+<span class="comment"># Abortar um merge em conflito</span>
+git merge <span class="flag">--abort</span></pre>
+      </div>
+
+      <div class="cmd" data-keywords="rebase rebasing linear histórico reorganizar">
+        <div class="cmd-name">git rebase</div>
+        <div class="cmd-what">Reaplica commits de uma branch sobre outra, criando um histórico linear</div>
+        <div class="cmd-when">Use para manter a branch atualizada com a main sem criar merge commits, ou para reorganizar commits antes de abrir um PR.</div>
+        <pre class="cmd-example"><span class="comment"># Rebasear feature na main atualizada</span>
+git switch feature/login
+git rebase main
+
+<span class="comment"># Rebase interativo (reorganizar/editar últimos 3 commits)</span>
+git rebase <span class="flag">-i</span> HEAD~3
+
+<span class="comment"># Continuar após resolver conflito</span>
+git rebase <span class="flag">--continue</span>
+
+<span class="comment"># Abortar o rebase</span>
+git rebase <span class="flag">--abort</span></pre>
+        <div class="danger">
+          <div class="danger-icon">🚨</div>
+          <div>
+            <div class="danger-title">Perigo — Reescreve histórico</div>
+            <div class="danger-text">Rebase reescreve os hashes dos commits. <strong>Nunca faça rebase de branches que outros membros da equipe já fizeram pull</strong> — isso causará divergência de histórico e conflitos difíceis de resolver. Use apenas em branches pessoais/locais não compartilhadas.</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <!-- 6. SINCRONIZAÇÃO COM REMOTO                            -->
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <div class="group" data-group="remoto">
+    <div class="group-header" onclick="toggleGroup(this)">
+      <div class="group-icon ic-teal">🌐</div>
+      <div class="group-meta">
+        <div class="group-title">Sincronização com Remoto</div>
+        <div class="group-desc">Envie, receba e sincronize commits com repositórios remotos</div>
+      </div>
+      <span class="group-count">4</span>
+      <svg class="chevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+    </div>
+    <div class="group-body">
+
+      <div class="cmd" data-keywords="fetch buscar baixar remoto atualizar referências">
+        <div class="cmd-name">git fetch</div>
+        <div class="cmd-what">Baixa atualizações do remoto sem integrar ao working tree</div>
+        <div class="cmd-when">Use para obter o estado atual do remoto sem mexer nos seus arquivos. Depois você decide se faz merge ou rebase. É mais seguro que <code>git pull</code>.</div>
+        <pre class="cmd-example"><span class="comment"># Buscar todos os remotos</span>
+git fetch
+
+<span class="comment"># Buscar um remoto específico</span>
+git fetch origin
+
+<span class="comment"># Buscar e remover branches deletadas no remoto</span>
+git fetch <span class="flag">--prune</span>
+
+<span class="comment"># Após fetch, ver o que mudou</span>
+git log HEAD..origin/main <span class="flag">--oneline</span></pre>
+      </div>
+
+      <div class="cmd" data-keywords="pull puxar baixar atualizar fetch merge">
+        <div class="cmd-name">git pull</div>
+        <div class="cmd-what">Busca atualizações do remoto e integra na branch atual (fetch + merge/rebase)</div>
+        <div class="cmd-when">Use para atualizar sua branch local com as mudanças do remoto. Prefira usar com <code>--rebase</code> para manter histórico linear.</div>
+        <pre class="cmd-example"><span class="comment"># Pull padrão (fetch + merge)</span>
+git pull
+
+<span class="comment"># Pull com rebase (histórico mais limpo)</span>
+git pull <span class="flag">--rebase</span>
+
+<span class="comment"># Pull de uma branch específica</span>
+git pull origin main
+
+<span class="comment"># Pull e remover branches deletadas no remoto</span>
+git pull <span class="flag">--prune</span></pre>
+      </div>
+
+      <div class="cmd" data-keywords="push enviar subir publicar remoto">
+        <div class="cmd-name">git push</div>
+        <div class="cmd-what">Envia commits locais para o repositório remoto</div>
+        <div class="cmd-when">Use após commitar localmente para publicar suas mudanças. Na primeira vez em uma nova branch, use <code>-u</code> para definir o upstream.</div>
+        <pre class="cmd-example"><span class="comment"># Push da branch atual</span>
+git push
+
+<span class="comment"># Primeiro push de uma nova branch</span>
+git push <span class="flag">-u</span> origin feature/login
+
+<span class="comment"># Push de uma tag específica</span>
+git push origin v1.0.0
+
+<span class="comment"># Push de todas as tags</span>
+git push <span class="flag">--tags</span>
+
+<span class="comment"># Deletar branch remota</span>
+git push origin <span class="flag">--delete</span> feature/login</pre>
+        <div class="danger">
+          <div class="danger-icon">🚨</div>
+          <div>
+            <div class="danger-title">Perigo — Force Push</div>
+            <div class="danger-text">Nunca use <code>git push --force</code> em branches compartilhadas (main, develop). Isso sobrescreve o histórico remoto e pode apagar commits de colegas. Se precisar usar, prefira <code>git push --force-with-lease</code>, que aborta caso o remoto tenha novos commits que você não tem localmente.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="cmd" data-keywords="push force-with-lease forçar seguro">
+        <div class="cmd-name">git push --force-with-lease</div>
+        <div class="cmd-what">Versão segura do force push — aborta se o remoto tiver commits desconhecidos</div>
+        <div class="cmd-when">Use após um <code>rebase</code> ou <code>amend</code> em uma branch pessoal para atualizar o remoto. Mais seguro que <code>--force</code>.</div>
+        <pre class="cmd-example"><span class="comment"># Force push seguro</span>
+git push <span class="flag">--force-with-lease</span>
+
+<span class="comment"># Com remote e branch explícitos</span>
+git push <span class="flag">--force-with-lease</span> origin feature/minha-branch</pre>
+        <div class="tip">Mesmo com <code>--force-with-lease</code>, evite force push em branches compartilhadas. Reserve para branches pessoais de PR.</div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <!-- 7. DESFAZENDO ALTERAÇÕES                               -->
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <div class="group" data-group="desfazendo">
+    <div class="group-header" onclick="toggleGroup(this)">
+      <div class="group-icon ic-orange">↩️</div>
+      <div class="group-meta">
+        <div class="group-title">Desfazendo Alterações</div>
+        <div class="group-desc">Reverta arquivos, commits e estados do repositório com segurança</div>
+      </div>
+      <span class="group-count">3</span>
+      <svg class="chevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+    </div>
+    <div class="group-body">
+
+      <div class="cmd" data-keywords="revert desfazer commit seguro público histórico">
+        <div class="cmd-name">git revert</div>
+        <div class="cmd-what">Cria um novo commit que desfaz as mudanças de um commit anterior</div>
+        <div class="cmd-when">É a forma <strong>segura</strong> de desfazer commits já publicados (pushed). Não reescreve histórico — adiciona um commit de reversão. Use sempre que precisar desfazer algo em branches compartilhadas.</div>
+        <pre class="cmd-example"><span class="comment"># Reverter o último commit</span>
+git revert HEAD
+
+<span class="comment"># Reverter sem abrir editor de mensagem</span>
+git revert HEAD <span class="flag">--no-edit</span>
+
+<span class="comment"># Reverter um commit específico</span>
+git revert a1b2c3d
+
+<span class="comment"># Reverter múltiplos commits (do mais recente ao mais antigo)</span>
+git revert HEAD~3..HEAD</pre>
+        <div class="tip">Use <code>git revert</code> em branches públicas/compartilhadas. Prefira <code>git reset</code> apenas em commits locais ainda não publicados.</div>
+      </div>
+
+      <div class="cmd" data-keywords="clean limpar remover arquivos não rastreados untracked">
+        <div class="cmd-name">git clean</div>
+        <div class="cmd-what">Remove arquivos não rastreados do diretório de trabalho</div>
+        <div class="cmd-when">Use para limpar arquivos gerados (builds, artefatos) que não estão no <code>.gitignore</code> ou para ter um working tree completamente limpo.</div>
+        <pre class="cmd-example"><span class="comment"># Simular o que seria removido (dry-run)</span>
+git clean <span class="flag">-n</span>
+
+<span class="comment"># Remover arquivos não rastreados</span>
+git clean <span class="flag">-f</span>
+
+<span class="comment"># Remover arquivos e diretórios não rastreados</span>
+git clean <span class="flag">-fd</span>
+
+<span class="comment"># Remover também arquivos ignorados (.gitignore)</span>
+git clean <span class="flag">-fdx</span></pre>
+        <div class="danger">
+          <div class="danger-icon">🚨</div>
+          <div>
+            <div class="danger-title">Perigo — Perda Permanente</div>
+            <div class="danger-text"><code>git clean -f</code> deleta arquivos do disco sem possibilidade de recuperação via Git. Sempre execute <code>git clean -n</code> primeiro para ver o que será removido antes de confirmar.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="cmd" data-keywords="reflog recuperar commit perdido referência log histórico">
+        <div class="cmd-name">git reflog</div>
+        <div class="cmd-what">Exibe o histórico de todas as referências (HEAD, branches), incluindo commits "perdidos"</div>
+        <div class="cmd-when">Use para recuperar commits após um <code>reset --hard</code> ou branch deletada acidentalmente. O reflog é a sua rede de segurança.</div>
+        <pre class="cmd-example"><span class="comment"># Ver histórico do HEAD</span>
+git reflog
+
+<span class="comment"># Recuperar após reset --hard acidental</span>
+git reflog
+<span class="comment"># Identificar o hash do commit perdido, então:</span>
+git reset <span class="flag">--hard</span> a1b2c3d
+
+<span class="comment"># Recriar branch a partir de commit perdido</span>
+git switch <span class="flag">-c</span> recuperado a1b2c3d</pre>
+        <div class="tip">O reflog expira por padrão em 90 dias. É sua maior ferramenta de recuperação em situações de emergência.</div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <!-- 8. REMOÇÃO E REESCRITA DE COMMITS                      -->
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <div class="group" data-group="reset">
+    <div class="group-header" onclick="toggleGroup(this)">
+      <div class="group-icon ic-red">⚡</div>
+      <div class="group-meta">
+        <div class="group-title">Remoção e Reescrita de Commits</div>
+        <div class="group-desc">Mova, remova ou reorganize commits — operações que reescrevem o histórico</div>
+      </div>
+      <span class="group-count">4</span>
+      <svg class="chevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+    </div>
+    <div class="group-body">
+
+      <div class="subgroup-label">git reset — modos de operação</div>
+
+      <div class="cmd" data-keywords="reset soft desfazer commit manter staged">
+        <div class="cmd-name">git reset --soft</div>
+        <div class="cmd-what">Move o HEAD para um commit anterior, mantendo todas as mudanças no staging</div>
+        <div class="cmd-when">Use para "descommitar" mantendo os arquivos prontos para um novo commit. Ideal para juntar vários commits em um só antes do push.</div>
+        <pre class="cmd-example"><span class="comment"># Desfazer o último commit (mantém no staging)</span>
+git reset <span class="flag">--soft</span> HEAD~1
+
+<span class="comment"># Desfazer os últimos 3 commits</span>
+git reset <span class="flag">--soft</span> HEAD~3
+
+<span class="comment"># Os arquivos continuam staged — agora commit de novo</span>
+git commit <span class="flag">-m</span> <span class="str">"feat: commit unificado"</span></pre>
+      </div>
+
+      <div class="cmd" data-keywords="reset mixed desfazer commit unstage working tree">
+        <div class="cmd-name">git reset --mixed</div>
+        <div class="cmd-what">Move o HEAD e limpa o staging, mas mantém as mudanças no working tree (modo padrão)</div>
+        <div class="cmd-when">Use para desfazer um commit e o <code>git add</code>, mantendo os arquivos modificados no disco. Permite reorganizar o que vai para o próximo commit.</div>
+        <pre class="cmd-example"><span class="comment"># Desfazer último commit e unstage (padrão)</span>
+git reset HEAD~1
+
+<span class="comment"># Equivalente explícito</span>
+git reset <span class="flag">--mixed</span> HEAD~1
+
+<span class="comment"># Unstage de um arquivo específico sem mover HEAD</span>
+git reset HEAD src/arquivo.ts</pre>
+      </div>
+
+      <div class="cmd" data-keywords="reset hard desfazer commit descartar deletar apagar">
+        <div class="cmd-name">git reset --hard</div>
+        <div class="cmd-what">Move o HEAD e descarta <strong>todas</strong> as mudanças (staging + working tree)</div>
+        <div class="cmd-when">Use para descartar completamente commits locais e voltar a um estado anterior. Use <strong>apenas</strong> em commits não publicados.</div>
+        <pre class="cmd-example"><span class="comment"># Descartar o último commit completamente</span>
+git reset <span class="flag">--hard</span> HEAD~1
+
+<span class="comment"># Voltar ao estado do remoto (descartar commits locais)</span>
+git reset <span class="flag">--hard</span> origin/main
+
+<span class="comment"># Voltar para um commit específico</span>
+git reset <span class="flag">--hard</span> a1b2c3d</pre>
+        <div class="danger">
+          <div class="danger-icon">🚨</div>
+          <div>
+            <div class="danger-title">Perigo — Dados Perdidos Permanentemente</div>
+            <div class="danger-text"><code>git reset --hard</code> apaga commits e mudanças sem recuperação fácil. Mudanças não commitadas são <strong>irrecuperáveis</strong>. Commits podem ser recuperados via <code>git reflog</code> por até 90 dias. Nunca use em branches compartilhadas após o push — force push seria necessário e causaria danos à equipe.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="subgroup-label">git rebase -i — reorganização interativa</div>
+
+      <div class="cmd" data-keywords="rebase interativo squash fixup editar reorganizar commits">
+        <div class="cmd-name">git rebase -i</div>
+        <div class="cmd-what">Rebase interativo: edite, junte, reordene ou remova commits</div>
+        <div class="cmd-when">Use antes de abrir um PR para limpar o histórico: juntar commits de WIP, corrigir mensagens, remover commits de debug, reordenar logicamente.</div>
+        <pre class="cmd-example"><span class="comment"># Editar os últimos 4 commits</span>
+git rebase <span class="flag">-i</span> HEAD~4
+
+<span class="comment"># No editor que abre, comandos disponíveis:</span>
+<span class="comment"># pick   — mantém o commit</span>
+<span class="comment"># reword — mantém mas edita a mensagem</span>
+<span class="comment"># edit   — pausa para amend</span>
+<span class="comment"># squash — une ao commit anterior (mantém msg)</span>
+<span class="comment"># fixup  — une ao commit anterior (descarta msg)</span>
+<span class="comment"># drop   — remove o commit completamente</span></pre>
+        <div class="danger">
+          <div class="danger-icon">🚨</div>
+          <div>
+            <div class="danger-title">Perigo — Reescreve histórico</div>
+            <div class="danger-text">O rebase interativo reescreve todos os hashes a partir do ponto selecionado. Use apenas em branches locais não compartilhadas. Após o rebase, será necessário <code>git push --force-with-lease</code>.</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <!-- 9. STASH                                               -->
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <div class="group" data-group="stash">
+    <div class="group-header" onclick="toggleGroup(this)">
+      <div class="group-icon ic-pink">🗂️</div>
+      <div class="group-meta">
+        <div class="group-title">Stash — Trabalho Temporário</div>
+        <div class="group-desc">Salve e restaure mudanças em progresso sem precisar commitá-las</div>
+      </div>
+      <span class="group-count">5</span>
+      <svg class="chevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+    </div>
+    <div class="group-body">
+
+      <div class="cmd" data-keywords="stash guardar salvar trabalho em progresso temporário">
+        <div class="cmd-name">git stash</div>
+        <div class="cmd-what">Guarda temporariamente mudanças não commitadas em uma pilha</div>
+        <div class="cmd-when">Use quando precisar mudar de branch urgentemente sem querer commitar um trabalho incompleto. O stash limpa o working tree para um estado limpo.</div>
+        <pre class="cmd-example"><span class="comment"># Guardar mudanças com mensagem descritiva</span>
+git stash push <span class="flag">-m</span> <span class="str">"wip: implementando tela de perfil"</span>
+
+<span class="comment"># Forma curta (sem mensagem)</span>
+git stash
+
+<span class="comment"># Incluir arquivos novos (untracked)</span>
+git stash <span class="flag">-u</span>
+
+<span class="comment"># Guardar apenas arquivos específicos</span>
+git stash push <span class="flag">-m</span> <span class="str">"wip"</span> src/componente.ts</pre>
+      </div>
+
+      <div class="cmd" data-keywords="stash list listar pilha entrada">
+        <div class="cmd-name">git stash list</div>
+        <div class="cmd-what">Lista todas as entradas na pilha de stash</div>
+        <div class="cmd-when">Use para ver o que está guardado antes de restaurar. Cada entrada é identificada por <code>stash@{n}</code>.</div>
+        <pre class="cmd-example"><span class="comment"># Listar stashes</span>
+git stash list
+
+<span class="comment"># Ver o diff de um stash específico</span>
+git stash show <span class="flag">-p</span> stash@{0}</pre>
+      </div>
+
+      <div class="cmd" data-keywords="stash pop aplicar restaurar recuperar">
+        <div class="cmd-name">git stash pop</div>
+        <div class="cmd-what">Restaura o stash mais recente e o remove da pilha</div>
+        <div class="cmd-when">Use para retomar um trabalho guardado. Se houver conflitos, resolva-os manualmente — o stash não é removido automaticamente em caso de conflito.</div>
+        <pre class="cmd-example"><span class="comment"># Restaurar o stash mais recente</span>
+git stash pop
+
+<span class="comment"># Restaurar um stash específico pelo índice</span>
+git stash pop stash@{2}</pre>
+      </div>
+
+      <div class="cmd" data-keywords="stash apply aplicar manter pilha">
+        <div class="cmd-name">git stash apply</div>
+        <div class="cmd-what">Aplica o stash sem removê-lo da pilha</div>
+        <div class="cmd-when">Use quando quiser aplicar o mesmo stash em múltiplas branches, ou quando não tiver certeza se vai querer o stash disponível depois.</div>
+        <pre class="cmd-example"><span class="comment"># Aplicar sem remover da pilha</span>
+git stash apply stash@{0}</pre>
+      </div>
+
+      <div class="cmd" data-keywords="stash drop clear limpar remover deletar">
+        <div class="cmd-name">git stash drop / clear</div>
+        <div class="cmd-what">Remove uma entrada ou limpa toda a pilha de stash</div>
+        <div class="cmd-when">Use para limpar stashes antigos que não são mais necessários.</div>
+        <pre class="cmd-example"><span class="comment"># Remover um stash específico</span>
+git stash drop stash@{1}
+
+<span class="comment"># Remover todos os stashes</span>
+git stash clear</pre>
+        <div class="warning">
+          <div class="warning-icon">⚠️</div>
+          <div>
+            <div class="warning-title">Atenção</div>
+            <div class="warning-text"><code>git stash clear</code> remove todos os stashes permanentemente. Verifique com <code>git stash list</code> antes de executar.</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <!-- 10. TAGS                                               -->
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <div class="group" data-group="tags">
+    <div class="group-header" onclick="toggleGroup(this)">
+      <div class="group-icon ic-orange">🏷️</div>
+      <div class="group-meta">
+        <div class="group-title">Tags e Releases</div>
+        <div class="group-desc">Marque pontos específicos do histórico para versões e releases</div>
+      </div>
+      <span class="group-count">4</span>
+      <svg class="chevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+    </div>
+    <div class="group-body">
+
+      <div class="cmd" data-keywords="tag listar criar versão release">
+        <div class="cmd-name">git tag</div>
+        <div class="cmd-what">Cria uma referência permanente (tag) para um commit</div>
+        <div class="cmd-when">Use para marcar versões de release (<code>v1.0.0</code>, <code>v2.3.1</code>). Tags anotadas (<code>-a</code>) são preferíveis pois armazenam metadados do autor e data.</div>
+        <pre class="cmd-example"><span class="comment"># Listar todas as tags</span>
+git tag
+
+<span class="comment"># Tag simples (lightweight)</span>
+git tag v1.0.0
+
+<span class="comment"># Tag anotada (recomendada para releases)</span>
+git tag <span class="flag">-a</span> v1.0.0 <span class="flag">-m</span> <span class="str">"Release versão 1.0.0"</span>
+
+<span class="comment"># Tag em um commit específico</span>
+git tag <span class="flag">-a</span> v0.9.0 a1b2c3d <span class="flag">-m</span> <span class="str">"Beta release"</span></pre>
+      </div>
+
+      <div class="cmd" data-keywords="tag push enviar publicar remoto">
+        <div class="cmd-name">git push --tags</div>
+        <div class="cmd-what">Envia tags para o repositório remoto</div>
+        <div class="cmd-when">Tags não são enviadas automaticamente com <code>git push</code>. Envie explicitamente após criar.</div>
+        <pre class="cmd-example"><span class="comment"># Enviar uma tag específica</span>
+git push origin v1.0.0
+
+<span class="comment"># Enviar todas as tags locais</span>
+git push <span class="flag">--tags</span>
+
+<span class="comment"># Deletar uma tag no remoto</span>
+git push origin <span class="flag">--delete</span> v1.0.0-beta</pre>
+      </div>
+
+      <div class="cmd" data-keywords="tag delete remover deletar local">
+        <div class="cmd-name">git tag -d</div>
+        <div class="cmd-what">Remove uma tag local</div>
+        <div class="cmd-when">Use para corrigir uma tag criada no commit errado ou com nome incorreto.</div>
+        <pre class="cmd-example"><span class="comment"># Deletar tag local</span>
+git tag <span class="flag">-d</span> v1.0.0-errada
+
+<span class="comment"># Depois deletar do remoto também</span>
+git push origin <span class="flag">--delete</span> v1.0.0-errada</pre>
+      </div>
+
+      <div class="cmd" data-keywords="describe versão semver tag mais recente">
+        <div class="cmd-name">git describe</div>
+        <div class="cmd-what">Descreve o commit atual em relação à tag mais próxima</div>
+        <div class="cmd-when">Útil em scripts de build para gerar versões dinâmicas baseadas nas tags do repositório.</div>
+        <pre class="cmd-example"><span class="comment"># Descrever o commit atual</span>
+git describe <span class="flag">--tags</span>
+<span class="comment"># Saída exemplo: v1.2.0-5-ga1b2c3d</span>
+<span class="comment"># (tag + nº de commits desde a tag + hash)</span></pre>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <!-- 11. FERRAMENTAS AVANÇADAS                              -->
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <div class="group" data-group="avancado">
+    <div class="group-header" onclick="toggleGroup(this)">
+      <div class="group-icon ic-purple">🔧</div>
+      <div class="group-meta">
+        <div class="group-title">Ferramentas Avançadas</div>
+        <div class="group-desc">Cherry-pick, bisect, worktree e outros comandos para situações específicas</div>
+      </div>
+      <span class="group-count">5</span>
+      <svg class="chevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+    </div>
+    <div class="group-body">
+
+      <div class="cmd" data-keywords="cherry-pick aplicar commit específico copiar trazer">
+        <div class="cmd-name">git cherry-pick</div>
+        <div class="cmd-what">Aplica as mudanças de um commit específico na branch atual</div>
+        <div class="cmd-when">Use para trazer um fix pontual de outra branch sem fazer merge completo. Muito útil em hotfixes que precisam ser aplicados na produção.</div>
+        <pre class="cmd-example"><span class="comment"># Aplicar um commit específico</span>
+git cherry-pick a1b2c3d
+
+<span class="comment"># Cherry-pick sem criar commit (fica no staging)</span>
+git cherry-pick <span class="flag">-n</span> a1b2c3d
+
+<span class="comment"># Cherry-pick de um range de commits</span>
+git cherry-pick a1b2c3d..f4e5d6c
+
+<span class="comment"># Continuar após resolver conflito</span>
+git cherry-pick <span class="flag">--continue</span>
+
+<span class="comment"># Abortar</span>
+git cherry-pick <span class="flag">--abort</span></pre>
+      </div>
+
+      <div class="cmd" data-keywords="bisect binary search bug introduzido quando regressão">
+        <div class="cmd-name">git bisect</div>
+        <div class="cmd-what">Busca binária no histórico para encontrar qual commit introduziu um bug</div>
+        <div class="cmd-when">Use quando souber que um bug existia em um commit antigo mas não no atual (ou vice-versa). O Git faz uma busca binária testando commits automaticamente.</div>
+        <pre class="cmd-example"><span class="comment"># Iniciar bisect</span>
+git bisect start
+
+<span class="comment"># Marcar commit atual como ruim (tem o bug)</span>
+git bisect bad
+
+<span class="comment"># Marcar commit antigo como bom (sem o bug)</span>
+git bisect good v1.0.0
+
+<span class="comment"># Git faz checkout de commits intermediários</span>
+<span class="comment"># Você testa e marca: good ou bad</span>
+git bisect good
+git bisect bad
+
+<span class="comment"># Git identifica o commit culpado</span>
+
+<span class="comment"># Finalizar e voltar ao HEAD</span>
+git bisect reset</pre>
+      </div>
+
+      <div class="cmd" data-keywords="worktree múltiplos diretórios branches simultâneas">
+        <div class="cmd-name">git worktree</div>
+        <div class="cmd-what">Cria múltiplas árvores de trabalho a partir do mesmo repositório</div>
+        <div class="cmd-when">Use quando precisar trabalhar em duas branches simultaneamente sem fazer stash ou alternar entre elas — útil para revisar um PR enquanto desenvolve outra feature.</div>
+        <pre class="cmd-example"><span class="comment"># Criar novo worktree para uma branch</span>
+git worktree add <span class="flag">../projeto-hotfix</span> hotfix/bug-critico
+
+<span class="comment"># Criar worktree com nova branch</span>
+git worktree add <span class="flag">-b</span> review/pr-123 ../pr-review origin/pr-123
+
+<span class="comment"># Listar worktrees</span>
+git worktree list
+
+<span class="comment"># Remover worktree</span>
+git worktree remove ../projeto-hotfix</pre>
+      </div>
+
+      <div class="cmd" data-keywords="grep buscar pesquisar texto código conteúdo">
+        <div class="cmd-name">git grep</div>
+        <div class="cmd-what">Pesquisa padrões de texto nos arquivos rastreados pelo repositório</div>
+        <div class="cmd-when">Use para encontrar ocorrências de uma string ou regex no código. Mais rápido que o grep do sistema em repositórios grandes pois usa o índice do Git.</div>
+        <pre class="cmd-example"><span class="comment"># Buscar uma string no código</span>
+git grep <span class="str">"useState"</span>
+
+<span class="comment"># Buscar com número da linha</span>
+git grep <span class="flag">-n</span> <span class="str">"TODO"</span>
+
+<span class="comment"># Buscar em um commit específico</span>
+git grep <span class="str">"função"</span> HEAD~5
+
+<span class="comment"># Buscar apenas em arquivos .ts</span>
+git grep <span class="str">"interface"</span> <span class="flag">--</span> <span class="str">"*.ts"</span></pre>
+      </div>
+
+      <div class="cmd" data-keywords="shortlog resumo contribuições autores commits contagem">
+        <div class="cmd-name">git shortlog</div>
+        <div class="cmd-what">Exibe resumo do número de commits por autor</div>
+        <div class="cmd-when">Use para ter uma visão rápida das contribuições de cada membro da equipe no repositório.</div>
+        <pre class="cmd-example"><span class="comment"># Resumo por autor</span>
+git shortlog <span class="flag">-sn</span>
+
+<span class="comment"># Resumo do último mês</span>
+git shortlog <span class="flag">-sn --since=</span><span class="str">"1 month ago"</span></pre>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <!-- 12. SUBMÓDULOS                                         -->
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <div class="group" data-group="submodulos">
+    <div class="group-header" onclick="toggleGroup(this)">
+      <div class="group-icon ic-sky">📎</div>
+      <div class="group-meta">
+        <div class="group-title">Submódulos</div>
+        <div class="group-desc">Gerencie repositórios Git aninhados dentro de outro repositório</div>
+      </div>
+      <span class="group-count">4</span>
+      <svg class="chevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+    </div>
+    <div class="group-body">
+
+      <div class="cmd" data-keywords="submodule add adicionar sub modulo repositório aninhado">
+        <div class="cmd-name">git submodule add</div>
+        <div class="cmd-what">Adiciona um repositório externo como submódulo do projeto atual</div>
+        <div class="cmd-when">Use quando precisar incluir uma dependência como código-fonte versionado junto ao projeto, com controle de versão independente.</div>
+        <pre class="cmd-example"><span class="comment"># Adicionar submódulo</span>
+git submodule add git@github.com:org/lib.git libs/minha-lib
+
+<span class="comment"># Clonar repositório que contém submódulos</span>
+git clone <span class="flag">--recurse-submodules</span> git@github.com:org/repo.git</pre>
+        <div class="warning">
+          <div class="warning-icon">⚠️</div>
+          <div>
+            <div class="warning-title">Complexidade extra</div>
+            <div class="warning-text">Submódulos adicionam complexidade ao fluxo de trabalho. Considere alternativas como gerenciadores de pacotes (npm, Maven) antes de optar por submódulos.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="cmd" data-keywords="submodule init update inicializar atualizar popular">
+        <div class="cmd-name">git submodule update</div>
+        <div class="cmd-what">Inicializa e atualiza os submódulos para os commits registrados no repositório pai</div>
+        <div class="cmd-when">Use após clonar um repositório com submódulos, ou após um pull que atualizou as referências dos submódulos.</div>
+        <pre class="cmd-example"><span class="comment"># Inicializar e atualizar todos os submódulos</span>
+git submodule update <span class="flag">--init --recursive</span>
+
+<span class="comment"># Atualizar para o HEAD do remoto</span>
+git submodule update <span class="flag">--remote</span></pre>
+      </div>
+
+      <div class="cmd" data-keywords="submodule foreach cada loop iterar todos">
+        <div class="cmd-name">git submodule foreach</div>
+        <div class="cmd-what">Executa um comando em cada submódulo</div>
+        <div class="cmd-when">Use para rodar operações em lote em todos os submódulos, como pull, status ou build.</div>
+        <pre class="cmd-example"><span class="comment"># Fazer pull em todos os submódulos</span>
+git submodule foreach <span class="str">'git pull origin main'</span>
+
+<span class="comment"># Ver status de cada submódulo</span>
+git submodule foreach git status</pre>
+      </div>
+
+      <div class="cmd" data-keywords="submodule deinit remover desativar">
+        <div class="cmd-name">git submodule deinit</div>
+        <div class="cmd-what">Remove a configuração local de um submódulo sem deletá-lo do histórico</div>
+        <div class="cmd-when">Use para desativar um submódulo localmente ou antes de removê-lo completamente do projeto.</div>
+        <pre class="cmd-example"><span class="comment"># Desativar um submódulo</span>
+git submodule deinit libs/minha-lib
+
+<span class="comment"># Remover completamente (deinit + rm + git rm)</span>
+git submodule deinit libs/minha-lib
+git rm libs/minha-lib
+rm <span class="flag">-rf</span> .git/modules/libs/minha-lib</pre>
+      </div>
+
+    </div>
+  </div>
+
+</main>
+
+<footer>
+  Git Pocket — Guia de referência para o dia a dia &nbsp;·&nbsp; github.com/git/git
+</footer>
+
+<script>
+  // Toggle group open/close
+  function toggleGroup(header) {
+    const group = header.closest('.group');
+    group.classList.toggle('open');
+  }
+
+  // Search
+  const searchInput = document.getElementById('search');
+  const noResults   = document.getElementById('no-results');
+  const searchTerm  = document.getElementById('search-term');
+
+  searchInput.addEventListener('input', () => {
+    const q = searchInput.value.trim().toLowerCase();
+
+    if (!q) {
+      document.querySelectorAll('.group').forEach(g => g.style.display = '');
+      document.querySelectorAll('.cmd').forEach(c => c.style.display = '');
+      noResults.style.display = 'none';
+      return;
+    }
+
+    let anyVisible = false;
+
+    document.querySelectorAll('.group').forEach(group => {
+      let groupHasMatch = false;
+
+      group.querySelectorAll('.cmd').forEach(cmd => {
+        const text     = cmd.textContent.toLowerCase();
+        const keywords = (cmd.dataset.keywords || '').toLowerCase();
+        const matches  = text.includes(q) || keywords.includes(q);
+        cmd.style.display = matches ? '' : 'none';
+        if (matches) groupHasMatch = true;
+      });
+
+      group.style.display = groupHasMatch ? '' : 'none';
+      if (groupHasMatch) {
+        group.classList.add('open');
+        anyVisible = true;
+      }
+    });
+
+    noResults.style.display  = anyVisible ? 'none' : 'block';
+    searchTerm.textContent   = q;
+  });
+</script>
+</body>
+</html>
