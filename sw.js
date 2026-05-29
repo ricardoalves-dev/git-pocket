@@ -3,6 +3,7 @@ const CACHE_NAME = 'git-pocket-v1';
 const ASSETS = [
   './',
   './index.html',
+  './styles.css',
   './manifest.json',
   './icons/icon-192.png',
   './icons/icon-512.png',
