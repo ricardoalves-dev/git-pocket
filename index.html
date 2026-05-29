@@ -1145,6 +1145,16 @@ rm <span class="flag">-rf</span> .git/modules/libs/minha-lib</pre>
   Git Pocket — Guia de referência para o dia a dia &nbsp;·&nbsp; github.com/git/git
 </footer>
 
+<div id="update-toast" role="status" aria-live="polite">
+  <span class="toast-icon">🔄</span>
+  <div class="toast-body">
+    <div class="toast-title">Nova versão disponível</div>
+    <div class="toast-subtitle">Atualizando automaticamente…</div>
+  </div>
+  <div class="toast-countdown" id="toast-counter">5</div>
+  <div class="toast-progress" id="toast-progress"></div>
+</div>
+
 <script>
   // Toggle group open/close
   function toggleGroup(header) {
@@ -1174,4 +1184,74 @@ rm <span class="flag">-rf</span> .git/modules/libs/minha-lib</pre>
 
       group.querySelectorAll('.cmd').forEach(cmd => {
         const text     = cmd.textContent.toLowerCase();
-        const keywords = (cmd.dataset.keyw
+        const keywords = (cmd.dataset.keywords || '').toLowerCase();
+        const matches  = text.includes(q) || keywords.includes(q);
+        cmd.style.display = matches ? '' : 'none';
+        if (matches) groupHasMatch = true;
+      });
+
+      group.style.display = groupHasMatch ? '' : 'none';
+      if (groupHasMatch) {
+        group.classList.add('open');
+        anyVisible = true;
+      }
+    });
+
+    noResults.style.display  = anyVisible ? 'none' : 'block';
+    searchTerm.textContent   = q;
+  });
+</script>
+
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('./sw.js').then(reg => {
+        console.log('[PWA] Service Worker registrado:', reg.scope);
+
+        function onUpdateReady(waitingSW) {
+          const COUNTDOWN = 5;
+          const toast     = document.getElementById('update-toast');
+          const counter   = document.getElementById('toast-counter');
+          const progress  = document.getElementById('toast-progress');
+
+          toast.classList.add('visible');
+
+          progress.style.transition = `transform ${COUNTDOWN}s linear`;
+          progress.getBoundingClientRect();
+          progress.style.transform = 'scaleX(0)';
+
+          let remaining = COUNTDOWN;
+          const interval = setInterval(() => {
+            remaining--;
+            counter.textContent = remaining;
+            if (remaining <= 0) {
+              clearInterval(interval);
+              waitingSW.postMessage({ type: 'SKIP_WAITING' });
+            }
+          }, 1000);
+        }
+
+        navigator.serviceWorker.addEventListener('controllerchange', () => {
+          window.location.reload();
+        });
+
+        if (reg.waiting) {
+          onUpdateReady(reg.waiting);
+          return;
+        }
+
+        reg.addEventListener('updatefound', () => {
+          const newSW = reg.installing;
+          newSW.addEventListener('statechange', () => {
+            if (newSW.state === 'installed' && navigator.serviceWorker.controller) {
+              onUpdateReady(newSW);
+            }
+          });
+        });
+
+      }).catch(err => console.warn('[PWA] Falha ao registrar SW:', err));
+    });
+  }
+</script>
+</body>
+</html>
