@@ -1,4 +1,4 @@
-const CACHE_NAME = 'git-pocket-v5';
+const CACHE_NAME = 'git-pocket-v6';
 
 const ASSETS = [
   './',
