@@ -1214,19 +1214,33 @@ rm <span class="flag">-rf</span> .git/modules/libs/minha-lib</pre>
           const counter   = document.getElementById('toast-counter');
           const progress  = document.getElementById('toast-progress');
 
+          // Exibe o toast com animação de entrada
+          counter.textContent = COUNTDOWN;
           toast.classList.add('visible');
 
-          progress.style.transition = `transform ${COUNTDOWN}s linear`;
-          progress.getBoundingClientRect();
-          progress.style.transform = 'scaleX(0)';
+          // Aguarda o próximo frame para garantir que o browser
+          // já registrou o estado inicial antes de iniciar a transição da barra
+          requestAnimationFrame(() => {
+            requestAnimationFrame(() => {
+              progress.style.transition = `transform ${COUNTDOWN}s linear`;
+              progress.style.transform  = 'scaleX(0)';
+            });
+          });
 
+          // Contador regressivo — começa a decrementar após 1s,
+          // assim o usuário vê o número inicial antes de mudar
           let remaining = COUNTDOWN;
           const interval = setInterval(() => {
             remaining--;
-            counter.textContent = remaining;
+            counter.textContent = remaining > 0 ? remaining : 0;
             if (remaining <= 0) {
               clearInterval(interval);
-              waitingSW.postMessage({ type: 'SKIP_WAITING' });
+              try {
+                waitingSW.postMessage({ type: 'SKIP_WAITING' });
+              } catch (e) {
+                // SW pode ter sido descartado; recarrega diretamente
+                window.location.reload();
+              }
             }
           }, 1000);
         }
