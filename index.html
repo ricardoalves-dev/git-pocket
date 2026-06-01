@@ -1139,6 +1139,217 @@ rm <span class="flag">-rf</span> .git/modules/libs/minha-lib</pre>
     </div>
   </div>
 
+
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <!-- 13. FLUXOS E SOLUÇÃO DE PROBLEMAS                      -->
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <div class="group" data-group="fluxos-problemas">
+    <div class="group-header" onclick="toggleGroup(this)">
+      <div class="group-icon ic-red">🛠️</div>
+      <div class="group-meta">
+        <div class="group-title">Fluxos e Solução de Problemas</div>
+        <div class="group-desc">Cenários completos do dia a dia: conflitos, commits errados, branch errada e recuperação de histórico</div>
+      </div>
+      <span class="group-count">7</span>
+      <svg class="chevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+    </div>
+    <div class="group-body">
+
+      <!-- 1. Feature Branch Workflow -->
+      <div class="cmd" data-keywords="workflow fluxo feature branch pull request pr ciclo completo desenvolvimento">
+        <div class="cmd-name">Feature Branch Workflow</div>
+        <div class="cmd-what">Fluxo completo para desenvolver uma nova funcionalidade sem impactar a branch principal</div>
+        <div class="cmd-when">Adote este fluxo sempre que for iniciar qualquer tarefa nova — seja uma feature, bugfix ou melhoria. Ele isola seu trabalho, facilita revisão de código e evita quebrar a branch principal.</div>
+        <pre class="cmd-example"><span class="comment"># 1. Garanta que seu ponto de partida está atualizado</span>
+git switch main
+git pull origin main
+
+<span class="comment"># 2. Crie uma branch descritiva para a tarefa</span>
+git switch <span class="flag">-c</span> feat/login-com-google
+
+<span class="comment"># 3. Desenvolva normalmente, fazendo commits atômicos</span>
+git add .
+git commit <span class="flag">-m</span> <span class="str">"feat: adiciona botão de login com Google"</span>
+
+<span class="comment"># 4. Mantenha sua branch atualizada com main durante o desenvolvimento</span>
+git fetch origin
+git rebase origin/main
+
+<span class="comment"># 5. Publique e abra o Pull Request</span>
+git push origin feat/login-com-google
+
+<span class="comment"># 6. Após aprovação e merge, limpe localmente</span>
+git switch main
+git pull origin main
+git branch <span class="flag">-d</span> feat/login-com-google</pre>
+      </div>
+
+      <!-- 2. Resolver conflito de merge -->
+      <div class="cmd" data-keywords="conflito conflict merge resolver solucionar CONFLICT both modified">
+        <div class="cmd-name">Resolver conflito de merge</div>
+        <div class="cmd-what">Passo a passo para resolver conflitos que surgem ao mesclar duas branches com alterações no mesmo trecho de código</div>
+        <div class="cmd-when">Conflitos acontecem quando dois commits modificam as mesmas linhas de um arquivo. O Git não sabe qual versão prevalece — cabe a você decidir. O processo é sempre o mesmo: identificar → editar → marcar resolvido → continuar.</div>
+        <pre class="cmd-example"><span class="comment"># Ao rodar merge e haver conflito, o Git avisa:</span>
+<span class="comment"># CONFLICT (content): Merge conflict in src/auth.ts</span>
+<span class="comment"># Automatic merge failed; fix conflicts and then commit.</span>
+
+<span class="comment"># 1. Veja quais arquivos estão em conflito</span>
+git status
+<span class="comment"># → both modified: src/auth.ts</span>
+
+<span class="comment"># 2. Abra o arquivo — o Git marca as divergências assim:</span>
+<span class="comment"># &lt;&lt;&lt;&lt;&lt;&lt;&lt; HEAD          ← sua versão atual</span>
+<span class="comment"># const url = '/login';</span>
+<span class="comment"># =======                ← separador</span>
+<span class="comment"># const url = '/auth';   ← versão que vem do merge</span>
+<span class="comment"># &gt;&gt;&gt;&gt;&gt;&gt;&gt; feat/nova-rota</span>
+
+<span class="comment"># 3. Edite o arquivo: remova os marcadores e deixe o código correto</span>
+
+<span class="comment"># 4. Marque o conflito como resolvido</span>
+git add src/auth.ts
+
+<span class="comment"># 5. Finalize o merge</span>
+git commit
+<span class="comment"># (o Git sugere uma mensagem de merge — pode aceitar ou personalizar)</span></pre>
+        <div class="warning">
+          <div class="warning-icon">💡</div>
+          <div>
+            <div class="warning-title">Dica</div>
+            <div class="warning-text">Use <code>git merge --abort</code> para cancelar todo o merge e voltar ao estado anterior, caso prefira recomeçar.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 3. Resolver conflito de rebase -->
+      <div class="cmd" data-keywords="conflito rebase conflict resolver patch applying">
+        <div class="cmd-name">Resolver conflito de rebase</div>
+        <div class="cmd-what">Como lidar com conflitos durante um <code>git rebase</code>, que aplica commits um a um</div>
+        <div class="cmd-when">No rebase, se houver conflito, o processo para no commit problemático para você resolver antes de continuar. Diferente do merge (um único conflito), no rebase você pode ter que resolver conflitos em vários commits sequencialmente.</div>
+        <pre class="cmd-example"><span class="comment"># Rebase parou com conflito — resolva o arquivo normalmente</span>
+<span class="comment"># (edite, remova os marcadores &lt;&lt;&lt;, ===, &gt;&gt;&gt;)</span>
+
+<span class="comment"># Marque como resolvido</span>
+git add src/auth.ts
+
+<span class="comment"># Continue o rebase (NÃO use git commit aqui!)</span>
+git rebase <span class="flag">--continue</span>
+
+<span class="comment"># Se o próximo commit também tiver conflito, repita o processo</span>
+
+<span class="comment"># Para abortar e voltar ao estado original</span>
+git rebase <span class="flag">--abort</span>
+
+<span class="comment"># Para pular o commit conflitante (use com cuidado)</span>
+git rebase <span class="flag">--skip</span></pre>
+      </div>
+
+      <!-- 4. Desfazer último commit (ainda não publicado) -->
+      <div class="cmd" data-keywords="desfazer commit errado undo ultimo reset amend corrigir mensagem">
+        <div class="cmd-name">Corrigir ou desfazer o último commit</div>
+        <div class="cmd-what">Três formas de consertar o commit mais recente antes de publicá-lo no remoto</div>
+        <div class="cmd-when">Use enquanto o commit ainda não foi enviado com <code>push</code>. Depois do push, reescrever o histórico causa problemas para quem já baixou.</div>
+        <pre class="cmd-example"><span class="comment">── Opção A: corrigir apenas a mensagem ──────────────</span>
+git commit <span class="flag">--amend</span> <span class="flag">-m</span> <span class="str">"fix: mensagem corrigida"</span>
+
+<span class="comment">── Opção B: incluir mais arquivos no commit ─────────</span>
+git add arquivo-esquecido.ts
+git commit <span class="flag">--amend</span> <span class="flag">--no-edit</span>
+<span class="comment"># (mantém a mesma mensagem)</span>
+
+<span class="comment">── Opção C: desfazer o commit, mantendo as alterações</span>
+git reset <span class="flag">HEAD~1</span>
+<span class="comment"># → arquivos voltam para unstaged; você edita e refaz o commit</span>
+
+<span class="comment">── Opção D: descartar o commit E as alterações ──────</span>
+git reset <span class="flag">--hard</span> HEAD~1</pre>
+        <div class="warning">
+          <div class="warning-icon">⚠️</div>
+          <div>
+            <div class="warning-title">Atenção</div>
+            <div class="warning-text"><code>--hard</code> descarta as alterações permanentemente. Use apenas se tiver certeza de que não precisa do código.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 5. Commit na branch errada -->
+      <div class="cmd" data-keywords="commit branch errada mover cherry-pick transferir trocar">
+        <div class="cmd-name">Commit feito na branch errada</div>
+        <div class="cmd-what">Como mover um ou mais commits para a branch correta quando você commitou no lugar errado</div>
+        <div class="cmd-when">Acontece quando você esquece de criar/trocar de branch antes de começar a trabalhar. O <code>cherry-pick</code> copia os commits para o destino certo; depois você os remove da branch de origem.</div>
+        <pre class="cmd-example"><span class="comment"># Cenário: você fez commits em 'main' que deveriam estar em 'feat/minha-feature'</span>
+
+<span class="comment"># 1. Anote o hash dos commits que serão movidos</span>
+git log <span class="flag">--oneline</span> <span class="flag">-5</span>
+<span class="comment"># ex: a1b2c3d feat: novo componente de tabela</span>
+
+<span class="comment"># 2. Vá para a branch de destino e aplique o commit</span>
+git switch feat/minha-feature
+git cherry-pick a1b2c3d
+
+<span class="comment"># 3. Volte para a branch de origem e remova o commit de lá</span>
+git switch main
+git reset <span class="flag">--hard</span> HEAD~1
+<span class="comment"># (ajuste o número se forem mais de 1 commit)</span></pre>
+        <div class="warning">
+          <div class="warning-icon">💡</div>
+          <div>
+            <div class="warning-title">Se o commit já foi publicado em main</div>
+            <div class="warning-text">Não use <code>reset --hard</code> em histórico público. Prefira <code>git revert &lt;hash&gt;</code> para criar um commit que desfaz o efeito, sem reescrever o histórico.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 6. Recuperar commits com reflog -->
+      <div class="cmd" data-keywords="reflog recuperar perder commit perdido reset hard desfazer acidente restaurar">
+        <div class="cmd-name">Recuperar commits perdidos com reflog</div>
+        <div class="cmd-what">O <code>reflog</code> é o "histórico dos históricos" — registra para onde HEAD apontou, permitindo recuperar commits após um <code>reset --hard</code> ou exclusão acidental de branch</div>
+        <div class="cmd-when">Use sempre que achar que perdeu trabalho por um reset, rebase mal feito ou branch deletada. O reflog guarda os ponteiros por 90 dias por padrão.</div>
+        <pre class="cmd-example"><span class="comment"># 1. Veja o histórico de movimentos do HEAD</span>
+git reflog
+<span class="comment"># Saída exemplo:</span>
+<span class="comment"># a1b2c3d HEAD@{0}: reset: moving to HEAD~2</span>
+<span class="comment"># f4e5d6c HEAD@{1}: commit: feat: formulário de contato   ← commit perdido!</span>
+<span class="comment"># 9g8h7i6 HEAD@{2}: commit: fix: validação de e-mail</span>
+
+<span class="comment"># 2. Restaure o estado que você quer</span>
+git reset <span class="flag">--hard</span> HEAD@{1}
+<span class="comment"># ou crie uma nova branch a partir do ponto perdido</span>
+git switch <span class="flag">-c</span> recuperado HEAD@{1}</pre>
+      </div>
+
+      <!-- 7. Hotfix em produção -->
+      <div class="cmd" data-keywords="hotfix producao urgente bug critico release fix emergencia main">
+        <div class="cmd-name">Hotfix em produção</div>
+        <div class="cmd-what">Fluxo para corrigir um bug crítico diretamente em produção sem incluir código incompleto que está em desenvolvimento</div>
+        <div class="cmd-when">Use quando há um bug urgente em produção e a branch <code>main</code>/<code>master</code> já possui commits novos que não podem ir para produção ainda. O hotfix parte diretamente da tag ou branch de release estável.</div>
+        <pre class="cmd-example"><span class="comment"># 1. Parta da branch/tag estável de produção</span>
+git switch main
+git pull origin main
+git switch <span class="flag">-c</span> hotfix/corrige-crash-login
+
+<span class="comment"># 2. Faça a correção e commite</span>
+git add .
+git commit <span class="flag">-m</span> <span class="str">"fix: corrige crash no login com sessão expirada"</span>
+
+<span class="comment"># 3. Merge de volta para main E para a branch de desenvolvimento</span>
+git switch main
+git merge <span class="flag">--no-ff</span> hotfix/corrige-crash-login
+git tag <span class="flag">-a</span> v1.2.1 <span class="flag">-m</span> <span class="str">"Hotfix: crash no login"</span>
+git push origin main <span class="flag">--tags</span>
+
+<span class="comment"># 4. Leve a correção também para a branch de desenvolvimento</span>
+git switch develop
+git merge <span class="flag">--no-ff</span> hotfix/corrige-crash-login
+git push origin develop
+
+<span class="comment"># 5. Limpe a branch de hotfix</span>
+git branch <span class="flag">-d</span> hotfix/corrige-crash-login</pre>
+      </div>
+
+    </div>
+  </div>
+
 </main>
 
 <footer>
