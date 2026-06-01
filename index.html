@@ -1141,7 +1141,240 @@ rm <span class="flag">-rf</span> .git/modules/libs/minha-lib</pre>
 
 
   <!-- ═══════════════════════════════════════════════════════ -->
-  <!-- 13. FLUXOS E SOLUÇÃO DE PROBLEMAS                      -->
+  <!-- 13. GITFLOW                                            -->
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <div class="group" data-group="gitflow">
+    <div class="group-header" onclick="toggleGroup(this)">
+      <div class="group-icon ic-green">🌿</div>
+      <div class="group-meta">
+        <div class="group-title">GitFlow</div>
+        <div class="group-desc">Modelo de ramificação estruturado para projetos com ciclos de release bem definidos</div>
+      </div>
+      <span class="group-count">6</span>
+      <svg class="chevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+    </div>
+    <div class="group-body">
+
+      <!-- 1. O que é GitFlow -->
+      <div class="cmd" data-keywords="gitflow o que é conceito modelo branching workflow nvie vincenzo driessen">
+        <div class="cmd-name">O que é GitFlow</div>
+        <div class="cmd-what">GitFlow é um modelo de ramificação (branching model) criado por Vincent Driessen que define um conjunto de regras sobre como criar, nomear e mesclar branches durante o ciclo de vida de um projeto</div>
+        <div class="cmd-when">
+          <strong>Use GitFlow quando seu projeto tem:</strong>
+          <ul style="margin: 8px 0 0 18px; line-height: 2">
+            <li>Ciclos de release planejados (versões v1.0, v1.1, v2.0…)</li>
+            <li>Múltiplos desenvolvedores trabalhando em paralelo</li>
+            <li>Necessidade de manter uma versão estável em produção enquanto o desenvolvimento continua</li>
+            <li>Processo formal de QA/homologação antes de cada release</li>
+          </ul>
+          <br>
+          <strong>Evite GitFlow quando:</strong>
+          <ul style="margin: 4px 0 0 18px; line-height: 2">
+            <li>O projeto usa entrega contínua (CI/CD com deploy a cada commit)</li>
+            <li>A equipe é pequena e o ritmo de entrega é alto — o overhead de branches pode ser desnecessário</li>
+          </ul>
+          <br>
+          O modelo define <strong>5 tipos de branches</strong> com papéis específicos:
+          <br><br>
+          <table style="width:100%; border-collapse:collapse; font-size:13px; margin-top:4px">
+            <thead>
+              <tr style="border-bottom:1px solid var(--border)">
+                <th style="text-align:left; padding:6px 8px; color:var(--text-muted)">Branch</th>
+                <th style="text-align:left; padding:6px 8px; color:var(--text-muted)">Papel</th>
+                <th style="text-align:left; padding:6px 8px; color:var(--text-muted)">Duração</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr style="border-bottom:1px solid var(--border-subtle)">
+                <td style="padding:6px 8px"><code>main</code></td>
+                <td style="padding:6px 8px">Código de produção — apenas versões estáveis</td>
+                <td style="padding:6px 8px">Permanente</td>
+              </tr>
+              <tr style="border-bottom:1px solid var(--border-subtle)">
+                <td style="padding:6px 8px"><code>develop</code></td>
+                <td style="padding:6px 8px">Integração contínua — onde features se encontram</td>
+                <td style="padding:6px 8px">Permanente</td>
+              </tr>
+              <tr style="border-bottom:1px solid var(--border-subtle)">
+                <td style="padding:6px 8px"><code>feature/*</code></td>
+                <td style="padding:6px 8px">Desenvolvimento de novas funcionalidades</td>
+                <td style="padding:6px 8px">Temporária</td>
+              </tr>
+              <tr style="border-bottom:1px solid var(--border-subtle)">
+                <td style="padding:6px 8px"><code>release/*</code></td>
+                <td style="padding:6px 8px">Preparação e ajustes finais de uma versão</td>
+                <td style="padding:6px 8px">Temporária</td>
+              </tr>
+              <tr>
+                <td style="padding:6px 8px"><code>hotfix/*</code></td>
+                <td style="padding:6px 8px">Correções urgentes direto em produção</td>
+                <td style="padding:6px 8px">Temporária</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <pre class="cmd-example"><span class="comment"># Diagrama simplificado do GitFlow:</span>
+<span class="comment">#</span>
+<span class="comment">#  main     ──●────────────────────────●──────────●──</span>
+<span class="comment">#              \                       /↑          /↑</span>
+<span class="comment">#  develop   ───●──●──●──●──────●──●──  \    ●───   \</span>
+<span class="comment">#                   \     \    /    \    \  / \      \</span>
+<span class="comment">#  feature        ───●──●──  ───●     release  hotfix</span></pre>
+      </div>
+
+      <!-- 2. Setup inicial -->
+      <div class="cmd" data-keywords="gitflow init inicializar setup configurar instalar git-flow">
+        <div class="cmd-name">Setup inicial do GitFlow</div>
+        <div class="cmd-what">Prepara o repositório com a estrutura de branches do GitFlow — pode ser feito com a extensão <code>git-flow</code> ou manualmente</div>
+        <div class="cmd-when">Faça o setup uma única vez no início do projeto, ou ao adotar GitFlow em um repositório existente. A extensão <code>git-flow</code> automatiza os merges e a criação de branches; sem ela, você executa os mesmos passos manualmente.</div>
+        <pre class="cmd-example"><span class="comment">── Com a extensão git-flow (recomendado) ────────────</span>
+<span class="comment"># Instalar (macOS)</span>
+brew install git-flow-avh
+
+<span class="comment"># Instalar (Linux)</span>
+apt-get install git-flow
+
+<span class="comment"># Inicializar no repositório (aceite os nomes padrão)</span>
+git flow init
+<span class="comment"># → pergunta os nomes das branches; pressione Enter para aceitar os padrões</span>
+
+<span class="comment">── Manualmente (sem a extensão) ─────────────────────</span>
+git switch <span class="flag">-c</span> develop
+git push origin develop
+<span class="comment"># (main já existe; basta criar develop a partir dela)</span></pre>
+      </div>
+
+      <!-- 3. Fluxo de Feature -->
+      <div class="cmd" data-keywords="gitflow feature branch nova funcionalidade start finish publish">
+        <div class="cmd-name">GitFlow — Fluxo de Feature</div>
+        <div class="cmd-what">Como criar, desenvolver e integrar uma nova funcionalidade seguindo o GitFlow</div>
+        <div class="cmd-when">Toda nova funcionalidade parte de <code>develop</code> e retorna para <code>develop</code> ao final. Nunca mergeia direto em <code>main</code>. A feature só vai para produção quando uma <code>release</code> for aberta.</div>
+        <pre class="cmd-example"><span class="comment">── Com a extensão git-flow ───────────────────────────</span>
+<span class="comment"># Iniciar feature (cria branch feature/pagamento-pix a partir de develop)</span>
+git flow feature start pagamento-pix
+
+<span class="comment"># Desenvolva normalmente com commits</span>
+git add .
+git commit <span class="flag">-m</span> <span class="str">"feat: implementa integração com API do Pix"</span>
+
+<span class="comment"># Finalizar (merge em develop + deleta a branch)</span>
+git flow feature finish pagamento-pix
+
+<span class="comment">── Manualmente ──────────────────────────────────────</span>
+git switch develop &amp;&amp; git pull origin develop
+git switch <span class="flag">-c</span> feature/pagamento-pix
+
+<span class="comment"># ... commits ...</span>
+
+git switch develop
+git merge <span class="flag">--no-ff</span> feature/pagamento-pix
+git branch <span class="flag">-d</span> feature/pagamento-pix
+git push origin develop</pre>
+        <div class="warning">
+          <div class="warning-icon">💡</div>
+          <div>
+            <div class="warning-title">Por que <code>--no-ff</code>?</div>
+            <div class="warning-text">O flag <code>--no-ff</code> (no fast-forward) força a criação de um commit de merge, preservando no histórico a informação de que aquele grupo de commits pertencia a uma feature. Sem ele, o histórico fica linear e perde esse contexto.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 4. Fluxo de Release -->
+      <div class="cmd" data-keywords="gitflow release versão tag preparar homologacao qa bump version">
+        <div class="cmd-name">GitFlow — Fluxo de Release</div>
+        <div class="cmd-what">Abre uma janela de estabilização antes de lançar a versão: apenas bugfixes, bump de versão e ajustes de documentação são permitidos</div>
+        <div class="cmd-when">Abra uma <code>release</code> quando <code>develop</code> já contém todas as features da próxima versão e está pronto para QA. Nenhuma feature nova entra na release — apenas correções de bugs encontrados nessa fase. Ao finalizar, a release vai para <code>main</code> (com tag) e também de volta para <code>develop</code>.</div>
+        <pre class="cmd-example"><span class="comment">── Com a extensão git-flow ───────────────────────────</span>
+<span class="comment"># Abrir release (parte de develop)</span>
+git flow release start 1.2.0
+
+<span class="comment"># Faça apenas bugfixes e bump de versão</span>
+git commit <span class="flag">-m</span> <span class="str">"chore: bump version to 1.2.0"</span>
+
+<span class="comment"># Finalizar: merge em main + tag + merge em develop + deleta branch</span>
+git flow release finish 1.2.0
+git push origin main develop <span class="flag">--tags</span>
+
+<span class="comment">── Manualmente ──────────────────────────────────────</span>
+git switch develop &amp;&amp; git pull origin develop
+git switch <span class="flag">-c</span> release/1.2.0
+
+<span class="comment"># ... ajustes finais ...</span>
+
+<span class="comment"># Merge em main com tag</span>
+git switch main
+git merge <span class="flag">--no-ff</span> release/1.2.0
+git tag <span class="flag">-a</span> v1.2.0 <span class="flag">-m</span> <span class="str">"Release 1.2.0"</span>
+
+<span class="comment"># Merge de volta em develop (para incluir os bugfixes da release)</span>
+git switch develop
+git merge <span class="flag">--no-ff</span> release/1.2.0
+
+git branch <span class="flag">-d</span> release/1.2.0
+git push origin main develop <span class="flag">--tags</span></pre>
+      </div>
+
+      <!-- 5. Fluxo de Hotfix -->
+      <div class="cmd" data-keywords="gitflow hotfix bug critico producao urgente corrigir main patch">
+        <div class="cmd-name">GitFlow — Fluxo de Hotfix</div>
+        <div class="cmd-what">Correção emergencial que parte diretamente de <code>main</code>, sem passar por <code>develop</code>, garantindo que código em desenvolvimento não contamine a correção</div>
+        <div class="cmd-when">Use quando há um bug crítico em produção e <code>develop</code> já possui commits que não estão prontos para ir a produção. O hotfix é a única branch temporária que parte de <code>main</code>. Ao finalizar, vai para <code>main</code> (com tag) e para <code>develop</code>.</div>
+        <pre class="cmd-example"><span class="comment">── Com a extensão git-flow ───────────────────────────</span>
+<span class="comment"># Abrir hotfix (parte de main)</span>
+git flow hotfix start 1.2.1
+
+<span class="comment"># Faça a correção</span>
+git commit <span class="flag">-m</span> <span class="str">"fix: corrige crash ao expirar sessão"</span>
+
+<span class="comment"># Finalizar: merge em main + tag + merge em develop</span>
+git flow hotfix finish 1.2.1
+git push origin main develop <span class="flag">--tags</span>
+
+<span class="comment">── Manualmente ──────────────────────────────────────</span>
+git switch main &amp;&amp; git pull origin main
+git switch <span class="flag">-c</span> hotfix/1.2.1
+
+<span class="comment"># ... correção ...</span>
+
+git switch main
+git merge <span class="flag">--no-ff</span> hotfix/1.2.1
+git tag <span class="flag">-a</span> v1.2.1 <span class="flag">-m</span> <span class="str">"Hotfix: crash na sessão"</span>
+
+git switch develop
+git merge <span class="flag">--no-ff</span> hotfix/1.2.1
+
+git branch <span class="flag">-d</span> hotfix/1.2.1
+git push origin main develop <span class="flag">--tags</span></pre>
+      </div>
+
+      <!-- 6. Quando NÃO usar GitFlow -->
+      <div class="cmd" data-keywords="gitflow alternativa trunk based github flow quando nao usar simples ci cd">
+        <div class="cmd-name">Alternativas ao GitFlow</div>
+        <div class="cmd-what">GitFlow não é bala de prata — conheça as alternativas para escolher o modelo certo para cada contexto</div>
+        <div class="cmd-when">O GitFlow brilha em projetos com releases versionadas e múltiplos ambientes. Para outros contextos, modelos mais simples entregam o mesmo controle com menos overhead.</div>
+        <pre class="cmd-example"><span class="comment">── GitHub Flow (para CI/CD e deploy contínuo) ────────</span>
+<span class="comment"># Apenas duas regras:</span>
+<span class="comment"># 1. main é sempre deployável</span>
+<span class="comment"># 2. Qualquer trabalho novo parte de main via feature branch</span>
+git switch <span class="flag">-c</span> feat/minha-feature
+<span class="comment"># → abre PR → revisão → merge em main → deploy automático</span>
+
+<span class="comment">── Trunk-Based Development (para times avançados) ───</span>
+<span class="comment"># Todos commitam direto em main (ou em branches de vida curtíssima)</span>
+<span class="comment"># Requer feature flags para esconder funcionalidades incompletas</span>
+<span class="comment"># Menor overhead, maior disciplina</span>
+
+<span class="comment">── Resumo rápido ─────────────────────────────────────</span>
+<span class="comment"># GitFlow      → releases versionadas, múltiplos ambientes</span>
+<span class="comment"># GitHub Flow  → SaaS, deploy contínuo, times ágeis</span>
+<span class="comment"># Trunk-Based  → times maduros com boa cobertura de testes</span></pre>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <!-- 14. FLUXOS E SOLUÇÃO DE PROBLEMAS                      -->
   <!-- ═══════════════════════════════════════════════════════ -->
   <div class="group" data-group="fluxos-problemas">
     <div class="group-header" onclick="toggleGroup(this)">
